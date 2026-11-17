@@ -42,4 +42,4 @@ El botón **Solución** muestra cómo debería funcionar cada ejercicio. El cód
 | 02 | Menú con rutas | `Routes`, `Route`, `NavLink` y la página 404 |
 | 03 | Página de un artista | Rutas con parámetros y `useParams` |
 | 04 | El cronómetro va al doble | Qué hace StrictMode y por qué un efecto necesita limpieza |
-| 05 | Desafío: perfil con sesión | Context, `Navigate` y `useNavigate` juntos, sin pasos guiados |
+| 05 | Perfil con sesión | Context, `Navigate` y `useNavigate` juntos |

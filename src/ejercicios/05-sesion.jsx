@@ -1,30 +1,76 @@
 import { createContext, useContext, useState } from 'react'
 import { Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 
-export const titulo = 'Desafío: perfil con sesión'
+export const titulo = 'Perfil con sesión'
 export const enunciado =
-  'Arma una app con Inicio, Login y Perfil, donde el perfil solo se ve con sesión iniciada. Esta vez no hay pasos guiados, así que tú decides cómo hacerlo.'
+  'La app tiene Inicio, Login y Perfil. Guarda la sesión en un contexto para que el perfil solo se vea después de entrar.'
 
-// ✅ REQUISITOS
-// 1. Un menú con dos links: "Inicio" (a /) y "Mi perfil" (a /perfil)
-// 2. En / se ve un <h3>Inicio</h3>
-// 3. Sin sesión, /perfil redirige a /login. Usa <Navigate to="/login" />
-// 4. En /login hay un <h3>Iniciar sesión</h3>, un input para el nombre y un botón "Entrar".
-//    Al entrar, se guarda la sesión y se vuelve a /perfil con useNavigate
-// 5. Con sesión, /perfil muestra "Hola, {nombre}" y un botón "Salir".
-//    Al salir, la sesión se borra y /perfil vuelve a pedir sesión
-// 6. La sesión vive en un SesionProvider con un hook useSesion, como en el taller de contexto
-//
-// Antes de programar, responde en papel. ¿Qué guarda el contexto? ¿Qué componentes lo leen?
+const SesionContext = createContext(null)
+
+function SesionProvider({ children }) {
+  // 🎃 1. Guarda el nombre de quien entró en un estado que parta en null
+  // 🎃 2. Crea dos funciones:
+  //       entrar(nuevoNombre) guarda el nombre
+  //       salir() vuelve a null
+  // 🎃 3. Comparte las tres cosas: value={{ nombre, entrar, salir }}
+  return <SesionContext.Provider value={null}>{children}</SesionContext.Provider>
+}
+
+function useSesion() {
+  // 🎃 4. Cambia esta línea por: return useContext(SesionContext)
+  return { nombre: null, entrar: () => {}, salir: () => {} }
+}
 
 export default function Sesion() {
   return (
-    // 🎁 Esto ya viene hecho. Tu app va dentro, en lugar del <p>.
     <MemoryRouter>
       <BarraDireccion />
-      {/* 🎃 Desde aquí es tuyo. */}
-      <p className="muted">Aquí va tu app</p>
+      {/* 🎃 5. Envuelve el menú y las rutas con <SesionProvider> */}
+      <nav className="menu-rutas">
+        <Link to="/">Inicio</Link>
+        <Link to="/perfil">Mi perfil</Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={<h3>Inicio</h3>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/perfil" element={<Perfil />} />
+      </Routes>
     </MemoryRouter>
+  )
+}
+
+function Login() {
+  const { entrar } = useSesion()
+  // 🎃 6. Obtén la función para navegar: const navigate = useNavigate()
+  const [nombre, setNombre] = useState('')
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    entrar(nombre)
+    // 🎃 7. Después de entrar, vuelve al perfil: navigate('/perfil')
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <h3>Iniciar sesión</h3>
+      <div className="row">
+        <input placeholder="Tu nombre" value={nombre} onChange={e => setNombre(e.target.value)} />
+        <button>Entrar</button>
+      </div>
+    </form>
+  )
+}
+
+function Perfil() {
+  const { nombre, salir } = useSesion()
+
+  // 🎃 8. Sin sesión, redirige al login: if (!nombre) return <Navigate to="/login" />
+
+  return (
+    <div className="row">
+      <p>Hola, {nombre}</p>
+      <button onClick={salir}>Salir</button>
+    </div>
   )
 }
 
@@ -34,13 +80,4 @@ function BarraDireccion() {
   return <div className="barra-direccion" aria-label="Barra de direcciones">localhost:5173{pathname}</div>
 }
 
-// 💡 Pistas, solo si te quedas pegado (léelas de a una):
-//
-// Pista 1: el contexto guarda el nombre de quien entró (o null) y dos funciones: entrar y salir.
-//
-// Pista 2: el SesionProvider va dentro del MemoryRouter y envuelve el menú y las rutas.
-//
-// Pista 3: la página de perfil decide qué mostrar.
-//          if (!nombre) return <Navigate to="/login" />
-//
-// Pista 4: en el login, después de entrar(nombre), llama a navigate('/perfil').
+// 💯 Extra: en Inicio, muestra "Hola, {nombre}" si hay sesión, o un link a /login si no hay.

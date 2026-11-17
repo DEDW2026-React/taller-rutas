@@ -78,3 +78,6 @@ main header p { margin: 4px 0; }
 .menu-rutas { display: flex; gap: 14px; margin-bottom: 12px; }
 .menu-rutas a { color: var(--blue); text-decoration: none; }
 .menu-rutas a.active { font-weight: 700; text-decoration: underline; }
+
+.error { border-left: 4px solid #d33; padding: 4px 0 4px 14px; }
+.error pre { white-space: pre-wrap; background: #fdecec; color: #8a1c1c; padding: 10px 12px; border-radius: 8px; }

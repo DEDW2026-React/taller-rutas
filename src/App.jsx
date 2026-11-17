@@ -1,6 +1,6 @@
 // Este archivo arma el menú del taller. No necesitas modificarlo.
 // Los ejercicios están en src/ejercicios.
-import { useState } from 'react'
+import { Component, useState } from 'react'
 
 const ejercicios = import.meta.glob('./ejercicios/*.jsx', { eager: true })
 const soluciones = import.meta.glob('./soluciones/*.jsx', { eager: true })
@@ -16,6 +16,43 @@ const lista = Object.keys(ejercicios).sort().map(path => {
     Solucion: soluciones['./soluciones/' + archivo]?.default,
   }
 })
+
+// Si un ejercicio falla, muestra el error acá en vez de dejar la página en blanco.
+// Al guardar el archivo, Vite recarga el ejercicio y se vuelve a intentar.
+class AtraparError extends Component {
+  state = { error: null }
+
+  static getDerivedStateFromError(error) {
+    return { error }
+  }
+
+  reintentar = () => this.setState({ error: null })
+
+  // Espera a que React cargue el código nuevo antes de reintentar
+  despuesDeGuardar = () => setTimeout(this.reintentar, 200)
+
+  componentDidMount() {
+    import.meta.hot?.on('vite:afterUpdate', this.despuesDeGuardar)
+  }
+
+  componentWillUnmount() {
+    import.meta.hot?.off('vite:afterUpdate', this.despuesDeGuardar)
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children
+    return (
+      <div className="error">
+        <strong>💥 El ejercicio falló</strong>
+        <pre>{this.state.error.message}</pre>
+        <p className="muted">
+          Revisa el archivo del ejercicio y la consola del navegador. Al guardar el archivo se vuelve a intentar.
+        </p>
+        <button onClick={this.reintentar}>Reintentar</button>
+      </div>
+    )
+  }
+}
 
 export default function App() {
   const [actual, setActual] = useState(() => {
@@ -69,7 +106,9 @@ export default function App() {
         </header>
 
         <section className={'resultado' + (verSolucion ? ' es-solucion' : '')}>
-          <Componente key={ejercicio.archivo + verSolucion} />
+          <AtraparError key={ejercicio.archivo + verSolucion}>
+            <Componente />
+          </AtraparError>
         </section>
       </main>
     </div>

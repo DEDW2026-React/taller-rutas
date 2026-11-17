@@ -10,7 +10,7 @@ async function entrar(nombre) {
   await userEvent.click(screen.getByRole('button', { name: 'Entrar' }))
 }
 
-describe('05 Desafío: perfil con sesión', () => {
+describe('05 Perfil con sesión', () => {
   test('2. parte en Inicio', () => {
     render(<Sesion />)
     expect(screen.getByRole('heading', { name: 'Inicio' })).toBeInTheDocument()
